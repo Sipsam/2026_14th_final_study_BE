@@ -11,14 +11,15 @@ import com.likelion.finalstudy.dto.response.UserResponse;
 public interface AuthService {
 
     /**
-     * 사용자 로그인
+     * 회원가입
+     */
+    UserResponse signup(RegisterRequest request);
+
+    /**
+     * 로그인
      */
     LoginResponse login(LoginRequest request);
 
-    /**
-     * 사용자 회원가입
-     */
-    UserResponse register(RegisterRequest request);
 
     /**
      * 토큰 유효성 검증
