@@ -1,6 +1,7 @@
 package com.likelion.finalstudy.service;
 
 import com.likelion.finalstudy.dto.request.LoginRequest;
+import com.likelion.finalstudy.dto.request.ReissueRequest;
 import com.likelion.finalstudy.dto.request.RegisterRequest;
 import com.likelion.finalstudy.dto.response.LoginResponse;
 import com.likelion.finalstudy.dto.response.UserResponse;
@@ -19,6 +20,16 @@ public interface AuthService {
      * 로그인
      */
     LoginResponse login(LoginRequest request);
+
+    /**
+     * Access/Refresh Token 재발급
+     */
+    LoginResponse reissue(ReissueRequest request);
+
+    /**
+     * 로그아웃
+     */
+    void logout(String email);
 
 
     /**

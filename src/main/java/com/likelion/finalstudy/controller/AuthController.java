@@ -1,9 +1,12 @@
 package com.likelion.finalstudy.controller;
 
 import com.likelion.finalstudy.dto.request.LoginRequest;
+import com.likelion.finalstudy.dto.request.ReissueRequest;
 import com.likelion.finalstudy.dto.request.RegisterRequest;
 import com.likelion.finalstudy.dto.response.LoginResponse;
 import com.likelion.finalstudy.dto.response.UserResponse;
+import com.likelion.finalstudy.global.exception.CustomException;
+import com.likelion.finalstudy.global.exception.ErrorCode;
 import com.likelion.finalstudy.global.response.ApiResponse;
 import com.likelion.finalstudy.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -11,6 +14,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
@@ -41,6 +45,29 @@ public class AuthController {
         log.info("User signup request: {}", request.getEmail());
         UserResponse response = authService.signup(request);
         return ResponseEntity.ok(ApiResponse.success("회원가입에 성공했습니다.", response));
+    }
+
+    @PostMapping("/reissue")
+    @Operation(summary = "토큰 재발급", description = "Refresh Token으로 Access/Refresh Token 재발급")
+    public ResponseEntity<ApiResponse<LoginResponse>> reissue(@Valid @RequestBody ReissueRequest request) {
+        LoginResponse response = authService.reissue(request);
+        return ResponseEntity.ok(ApiResponse.success("토큰 재발급에 성공했습니다.", response));
+    }
+
+    @PostMapping("/logout")
+    @Operation(summary = "로그아웃", description = "현재 사용자 Refresh Token 삭제")
+    public ResponseEntity<ApiResponse<Void>> logout(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED);
+        }
+
+        String email = authentication.getName();
+        if (email == null || email.isBlank() || "anonymousUser".equalsIgnoreCase(email)) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED);
+        }
+
+        authService.logout(email);
+        return ResponseEntity.ok(ApiResponse.success("로그아웃에 성공했습니다.", null));
     }
 }
 

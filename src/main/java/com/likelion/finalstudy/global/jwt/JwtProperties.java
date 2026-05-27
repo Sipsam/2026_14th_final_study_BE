@@ -13,11 +13,18 @@ public class JwtProperties {
 
     private String secretKey;
     private AccessToken accessToken = new AccessToken();
+    private RefreshToken refreshToken = new RefreshToken();
 
     @Getter
     @Setter
     public static class AccessToken {
         private String header = "Authorization";
+        private long expiration;
+    }
+
+    @Getter
+    @Setter
+    public static class RefreshToken {
         private long expiration;
     }
 }

@@ -25,6 +25,9 @@ public class JwtProvider {
 
     private static final String CLAIM_USER_ID = "userId";
     private static final String CLAIM_EMAIL = "email";
+    private static final String CLAIM_TOKEN_TYPE = "tokenType";
+    private static final String ACCESS_TOKEN_TYPE = "access";
+    private static final String REFRESH_TOKEN_TYPE = "refresh";
     private final JwtProperties jwtProperties;
 
     private SecretKey getSigningKey() {
@@ -35,14 +38,23 @@ public class JwtProvider {
      * Access Token 생성
      */
     public String generateAccessToken(Long userId, String email) {
+        return generateToken(userId, email, jwtProperties.getAccessToken().getExpiration(), ACCESS_TOKEN_TYPE);
+    }
+
+    public String generateRefreshToken(Long userId, String email) {
+        return generateToken(userId, email, jwtProperties.getRefreshToken().getExpiration(), REFRESH_TOKEN_TYPE);
+    }
+
+    private String generateToken(Long userId, String email, long expiration, String tokenType) {
         long now = System.currentTimeMillis();
         Date issuedAt = new Date(now);
-        Date expiresAt = new Date(now + jwtProperties.getAccessToken().getExpiration());
+        Date expiresAt = new Date(now + expiration);
 
         return Jwts.builder()
                 .subject(email)
                 .claim(CLAIM_USER_ID, userId)
                 .claim(CLAIM_EMAIL, email)
+                .claim(CLAIM_TOKEN_TYPE, tokenType)
                 .issuedAt(issuedAt)
                 .expiration(expiresAt)
                 .signWith(getSigningKey())
@@ -54,6 +66,20 @@ public class JwtProvider {
      */
     public String generateAccessToken(String email) {
         return generateAccessToken(null, email);
+    }
+
+    public boolean isRefreshToken(String token) {
+        Claims claims = parseClaims(token);
+        String tokenType = claims.get(CLAIM_TOKEN_TYPE, String.class);
+        return REFRESH_TOKEN_TYPE.equals(tokenType);
+    }
+
+    public void validateRefreshToken(String token) {
+        Claims claims = parseClaims(token);
+        String tokenType = claims.get(CLAIM_TOKEN_TYPE, String.class);
+        if (!REFRESH_TOKEN_TYPE.equals(tokenType)) {
+            throw new CustomException(ErrorCode.INVALID_TOKEN, "리프레시 토큰이 아닙니다.");
+        }
     }
 
     /**
