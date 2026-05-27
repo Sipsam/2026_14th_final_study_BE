@@ -87,7 +87,7 @@ public class GlobalExceptionHandler {
             return ErrorCode.VALIDATION_ERROR.getMessage();
         }
 
-        String details = fieldErrors.stream()
+        return fieldErrors.stream()
                 .map(error -> {
                     String defaultMessage = error.getDefaultMessage() == null
                             ? "유효하지 않은 값입니다."
@@ -95,8 +95,6 @@ public class GlobalExceptionHandler {
                     return error.getField() + ": " + defaultMessage;
                 })
                 .collect(Collectors.joining(", "));
-
-        return ErrorCode.VALIDATION_ERROR.getMessage() + " - " + details;
     }
 }
 
