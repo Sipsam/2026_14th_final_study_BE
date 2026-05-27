@@ -21,7 +21,7 @@ jobs:
           script: |
             set -e
 
-            cd ~/${{ github.event.repository.name }}
+            cd ~/apps/${{ github.event.repository.name }}
             git pull origin week8/#6-jangsungwon
 
             docker compose down
