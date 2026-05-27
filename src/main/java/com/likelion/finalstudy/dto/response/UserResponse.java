@@ -1,5 +1,6 @@
 package com.likelion.finalstudy.dto.response;
 
+import com.likelion.finalstudy.domain.user.Role;
 import com.likelion.finalstudy.domain.user.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,11 +20,11 @@ public class UserResponse {
 
     private Long id;
 
-    private String username;
-
     private String email;
 
-    private Boolean isActive;
+    private String name;
+
+    private Role role;
 
     private LocalDateTime createdAt;
 
@@ -35,9 +36,9 @@ public class UserResponse {
     public static UserResponse fromEntity(User user) {
         return UserResponse.builder()
                 .id(user.getId())
-                .username(user.getUsername())
                 .email(user.getEmail())
-                .isActive(user.getIsActive())
+                .name(user.getName())
+                .role(user.getRole())
                 .createdAt(user.getCreatedAt())
                 .updatedAt(user.getUpdatedAt())
                 .build();

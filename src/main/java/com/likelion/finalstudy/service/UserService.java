@@ -8,19 +8,15 @@ import com.likelion.finalstudy.dto.response.UserResponse;
 public interface UserService {
 
     /**
-     * 사용자명으로 사용자 정보 조회
+     * 이메일로 사용자 정보 조회
      */
-    UserResponse getUserByUsername(String username);
+    UserResponse getUserByEmail(String email);
 
     /**
      * 사용자ID로 사용자 정보 조회
      */
     UserResponse getUserById(Long userId);
 
-    /**
-     * 사용자가 존재하는지 확인
-     */
-    boolean existsByUsername(String username);
 
     /**
      * 이메일이 존재하는지 확인
