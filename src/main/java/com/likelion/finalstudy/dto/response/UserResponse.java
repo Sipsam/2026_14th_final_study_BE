@@ -28,8 +28,6 @@ public class UserResponse {
 
     private LocalDateTime createdAt;
 
-    private LocalDateTime updatedAt;
-
     /**
      * User 엔티티에서 UserResponse로 변환
      */
@@ -40,7 +38,6 @@ public class UserResponse {
                 .name(user.getName())
                 .role(user.getRole())
                 .createdAt(user.getCreatedAt())
-                .updatedAt(user.getUpdatedAt())
                 .build();
     }
 }

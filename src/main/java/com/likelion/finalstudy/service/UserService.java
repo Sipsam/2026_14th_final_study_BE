@@ -8,14 +8,14 @@ import com.likelion.finalstudy.dto.response.UserResponse;
 public interface UserService {
 
     /**
+     * 로그인한 사용자 정보 조회
+     */
+    UserResponse getMyInfo(String email);
+
+    /**
      * 이메일로 사용자 정보 조회
      */
     UserResponse getUserByEmail(String email);
-
-    /**
-     * 사용자ID로 사용자 정보 조회
-     */
-    UserResponse getUserById(Long userId);
 
 
     /**
