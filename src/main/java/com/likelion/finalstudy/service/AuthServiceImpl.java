@@ -34,7 +34,7 @@ public class AuthServiceImpl implements AuthService {
     private final JwtProperties jwtProperties;
 
     @Override
-    @Transactional
+    @Transactional(readOnly = false)
     public UserResponse signup(RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new CustomException(ErrorCode.DUPLICATED_EMAIL);
@@ -47,6 +47,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    @Transactional(readOnly = false)
     public LoginResponse login(LoginRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
@@ -63,7 +64,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = false)
     public LoginResponse reissue(ReissueRequest request) {
         String requestRefreshToken = request.getRefreshToken();
         jwtProvider.validateRefreshToken(requestRefreshToken);
@@ -91,7 +92,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = false)
     public void logout(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
