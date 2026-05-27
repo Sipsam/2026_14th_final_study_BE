@@ -1,9 +1,15 @@
 package com.likelion.finalstudy.global.jwt;
 
-import io.jsonwebtoken.*;
+import com.likelion.finalstudy.global.exception.CustomException;
+import com.likelion.finalstudy.global.exception.ErrorCode;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.security.Keys;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
+import io.jsonwebtoken.security.SecurityException;
+import io.jsonwebtoken.UnsupportedJwtException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -13,58 +19,78 @@ import java.util.Date;
 /**
  * JWT 토큰 제공자
  */
-@Slf4j
 @Component
+@RequiredArgsConstructor
 public class JwtProvider {
 
-    @Value("${jwt.secret-key}")
-    private String secretKey;
-
-    @Value("${jwt.access-token.expiration}")
-    private long accessTokenExpiration;
+    private static final String CLAIM_USER_ID = "userId";
+    private static final String CLAIM_EMAIL = "email";
+    private final JwtProperties jwtProperties;
 
     private SecretKey getSigningKey() {
-        return Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
+        return Keys.hmacShaKeyFor(jwtProperties.getSecretKey().getBytes(StandardCharsets.UTF_8));
     }
 
     /**
      * Access Token 생성
      */
-    public String generateAccessToken(String subject) {
-        return generateToken(subject, accessTokenExpiration);
-    }
-
-    /**
-     * 토큰 생성
-     */
-    private String generateToken(String subject, long expiration) {
+    public String generateAccessToken(Long userId, String email) {
         long now = System.currentTimeMillis();
         Date issuedAt = new Date(now);
-        Date expiresAt = new Date(now + expiration);
+        Date expiresAt = new Date(now + jwtProperties.getAccessToken().getExpiration());
 
         return Jwts.builder()
-                .subject(subject)
+                .subject(email)
+                .claim(CLAIM_USER_ID, userId)
+                .claim(CLAIM_EMAIL, email)
                 .issuedAt(issuedAt)
                 .expiration(expiresAt)
-                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .signWith(getSigningKey())
                 .compact();
     }
 
     /**
-     * 토큰에서 subject 추출
+     * 하위 호환용 Access Token 생성
      */
+    public String generateAccessToken(String email) {
+        return generateAccessToken(null, email);
+    }
+
+    /**
+     * 토큰에서 email(subject) 추출
+     */
+    public String extractEmail(String token) {
+        Claims claims = parseClaims(token);
+        String email = claims.get(CLAIM_EMAIL, String.class);
+        return email != null ? email : claims.getSubject();
+    }
+
     public String extractSubject(String token) {
-        try {
-            return Jwts.parser()
-                    .verifyWith(getSigningKey())
-                    .build()
-                    .parseSignedClaims(token)
-                    .getPayload()
-                    .getSubject();
-        } catch (JwtException e) {
-            log.error("Failed to extract subject from token", e);
+        return extractEmail(token);
+    }
+
+    /**
+     * 토큰에서 userId 추출
+     */
+    public Long extractUserId(String token) {
+        Claims claims = parseClaims(token);
+        Object value = claims.get(CLAIM_USER_ID);
+
+        if (value == null) {
             return null;
         }
+
+        if (value instanceof Integer integerValue) {
+            return integerValue.longValue();
+        }
+        if (value instanceof Long longValue) {
+            return longValue;
+        }
+        if (value instanceof String stringValue && !stringValue.isBlank()) {
+            return Long.parseLong(stringValue);
+        }
+
+        throw new CustomException(ErrorCode.INVALID_TOKEN, "토큰의 userId 형식이 올바르지 않습니다.");
     }
 
     /**
@@ -72,17 +98,32 @@ public class JwtProvider {
      */
     public boolean validateToken(String token) {
         try {
-            Jwts.parser()
+            parseClaims(token);
+            return true;
+        } catch (CustomException e) {
+            return false;
+        }
+    }
+
+    public Claims parseClaims(String token) {
+        if (token == null || token.isBlank()) {
+            throw new CustomException(ErrorCode.INVALID_TOKEN, "토큰이 비어 있습니다.");
+        }
+
+        try {
+            return Jwts.parser()
                     .verifyWith(getSigningKey())
                     .build()
-                    .parseSignedClaims(token);
-            return true;
-        } catch (JwtException e) {
-            log.error("JWT validation failed: {}", e.getMessage());
-            return false;
+                    .parseSignedClaims(token)
+                    .getPayload();
+        } catch (ExpiredJwtException e) {
+            throw new CustomException(ErrorCode.EXPIRED_TOKEN, ErrorCode.EXPIRED_TOKEN.getMessage());
+        } catch (MalformedJwtException | UnsupportedJwtException | SecurityException e) {
+            throw new CustomException(ErrorCode.INVALID_TOKEN, "잘못된 JWT 형식입니다.");
         } catch (IllegalArgumentException e) {
-            log.error("JWT claims string is empty: {}", e.getMessage());
-            return false;
+            throw new CustomException(ErrorCode.INVALID_TOKEN, "토큰 문자열이 비어 있습니다.");
+        } catch (Exception e) {
+            throw new CustomException(ErrorCode.INVALID_TOKEN, ErrorCode.INVALID_TOKEN.getMessage());
         }
     }
 }

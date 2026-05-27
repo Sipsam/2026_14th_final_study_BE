@@ -17,18 +17,27 @@ import java.nio.charset.StandardCharsets;
 @Component
 public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
+    private static final String AUTH_ERROR_CODE = "authErrorCode";
+    private static final String AUTH_ERROR_MESSAGE = "authErrorMessage";
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     public void commence(HttpServletRequest request,
                          HttpServletResponse response,
                          AuthenticationException authException) throws IOException, ServletException {
-        ErrorCode errorCode = ErrorCode.UNAUTHORIZED;
-        response.setStatus(errorCode.getCode());
+        Object statusCode = request.getAttribute(AUTH_ERROR_CODE);
+        Object statusMessage = request.getAttribute(AUTH_ERROR_MESSAGE);
+
+        int code = statusCode instanceof Integer ? (Integer) statusCode : ErrorCode.UNAUTHORIZED.getCode();
+        String message = statusMessage instanceof String && !((String) statusMessage).isBlank()
+                ? (String) statusMessage
+                : ErrorCode.UNAUTHORIZED.getMessage();
+
+        response.setStatus(code);
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.getWriter().write(objectMapper.writeValueAsString(
-                ApiResponse.fail(errorCode.getCode(), errorCode.getMessage())
+                ApiResponse.fail(code, message)
         ));
     }
 }

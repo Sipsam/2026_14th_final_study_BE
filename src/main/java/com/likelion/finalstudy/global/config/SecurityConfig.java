@@ -1,6 +1,6 @@
 package com.likelion.finalstudy.global.config;
 
-import com.likelion.finalstudy.global.jwt.JwtFilter;
+import com.likelion.finalstudy.global.jwt.JwtAuthenticationFilter;
 import com.likelion.finalstudy.global.security.CustomAccessDeniedHandler;
 import com.likelion.finalstudy.global.security.CustomAuthenticationEntryPoint;
 import org.springframework.beans.factory.ObjectProvider;
@@ -27,11 +27,11 @@ import java.util.List;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    private final ObjectProvider<JwtFilter> jwtFilterProvider;
+    private final ObjectProvider<JwtAuthenticationFilter> jwtFilterProvider;
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
-    public SecurityConfig(ObjectProvider<JwtFilter> jwtFilterProvider,
+    public SecurityConfig(ObjectProvider<JwtAuthenticationFilter> jwtFilterProvider,
                           CustomAuthenticationEntryPoint customAuthenticationEntryPoint,
                           CustomAccessDeniedHandler customAccessDeniedHandler) {
         this.jwtFilterProvider = jwtFilterProvider;
@@ -63,7 +63,7 @@ public class SecurityConfig {
                 );
 
         // JwtAuthenticationFilter 도입 시 해당 필터를 UsernamePasswordAuthenticationFilter 앞에 추가한다.
-        JwtFilter jwtFilter = jwtFilterProvider.getIfAvailable();
+        JwtAuthenticationFilter jwtFilter = jwtFilterProvider.getIfAvailable();
         if (jwtFilter != null) {
             http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
         }
