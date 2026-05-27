@@ -1,0 +1,40 @@
+name: Deploy to Vultr (Docker Compose)
+
+on:
+  push:
+    branches:
+      - 'week8/#6-jangsungwon'
+
+jobs:
+  deploy:
+    name: SSH Deploy to Vultr Ubuntu
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Execute Remote Deployment Commands
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script_stop: true
+          script: |
+            set -e
+
+            cd ~/${{ github.event.repository.name }}
+            git pull origin week8/#6-jangsungwon
+
+            docker compose down
+            docker compose up -d --build
+
+            docker ps
+
+            if curl -fsS http://localhost:8080/actuator/health; then
+              echo "Health check passed: /actuator/health"
+            elif curl -fsS http://localhost:8080/v3/api-docs >/dev/null; then
+              echo "Fallback health check passed: /v3/api-docs"
+            else
+              echo "Health check failed"
+              docker compose logs --tail=200 app
+              exit 1
+            fi
