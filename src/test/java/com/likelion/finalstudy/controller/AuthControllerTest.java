@@ -2,6 +2,7 @@ package com.likelion.finalstudy.controller;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.likelion.finalstudy.config.TestRestTemplateTestConfig;
 import com.likelion.finalstudy.repository.RefreshTokenRepository;
 import com.likelion.finalstudy.repository.UserRepository;
 import org.junit.jupiter.api.AfterEach;
@@ -18,6 +19,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.context.annotation.Import;
 
 import java.util.Map;
 
@@ -26,6 +28,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureTestRestTemplate
 @ActiveProfiles("test")
+@Import(TestRestTemplateTestConfig.class)
 class AuthControllerTest {
 
     @Autowired
