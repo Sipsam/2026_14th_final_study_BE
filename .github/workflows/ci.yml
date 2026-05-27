@@ -30,4 +30,4 @@ jobs:
       - name: Run Clean Build (Includes Tests with test Profile/H2)
         env:
           SPRING_PROFILES_ACTIVE: test
-        run: ./gradlew clean build
+        run: ./gradlew clean build --stacktrace
