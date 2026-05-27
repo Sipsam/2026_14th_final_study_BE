@@ -5,7 +5,7 @@ spring:
   datasource:
     url: jdbc:mysql://localhost:3306/final_study_db?serverTimezone=Asia/Seoul&characterEncoding=UTF-8&useSSL=false&allowPublicKeyRetrieval=true
     username: root
-    password: change-me
+    password: your-local-mysql-password
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
@@ -22,8 +22,8 @@ spring:
       write-dates-as-timestamps: false
 
 jwt:
-  # NOTE: 개발 편의를 위해 직접 작성. 실제 서비스에서는 환경변수/시크릿 매니저로 분리하세요.
-  secret-key: your-secret-key-your-secret-key-your-secret-key
+  # NOTE: 로컬 개발용 예시 값입니다. 운영 환경에서는 환경변수/서버 설정으로 분리하세요.
+  secret-key: your-jwt-secret-key-placeholder
   access-token:
     header: Authorization
     expiration: 3600000
