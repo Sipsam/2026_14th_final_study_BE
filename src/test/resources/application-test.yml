@@ -5,12 +5,19 @@ spring:
     password:
 
   jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
       ddl-auto: create-drop
     show-sql: false
     properties:
       hibernate:
         format_sql: true
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
 
 jwt:
   secret-key: test-secret-key-test-secret-key-test-secret-key-123456
