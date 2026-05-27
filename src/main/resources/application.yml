@@ -1,11 +1,11 @@
 spring:
   application:
-    name: final-study
+    name: final
 
   datasource:
     url: jdbc:mysql://localhost:3306/final_study_db?serverTimezone=Asia/Seoul&characterEncoding=UTF-8&useSSL=false&allowPublicKeyRetrieval=true
     username: root
-    password: 1234
+    password: change-me
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
@@ -15,17 +15,20 @@ spring:
       hibernate:
         format_sql: true
         use_sql_comments: true
-    show-sql: false
+    show-sql: true
 
   jackson:
     serialization:
       write-dates-as-timestamps: false
 
 jwt:
+  # NOTE: 개발 편의를 위해 직접 작성. 실제 서비스에서는 환경변수/시크릿 매니저로 분리하세요.
   secret-key: your-secret-key-your-secret-key-your-secret-key
   access-token:
     header: Authorization
     expiration: 3600000
+  refresh-token:
+    expiration: 1209600000
 
 springdoc:
   api-docs:
