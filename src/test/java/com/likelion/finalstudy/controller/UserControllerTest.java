@@ -2,16 +2,10 @@ package com.likelion.finalstudy.controller;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.likelion.finalstudy.config.TestRestTemplateTestConfig;
-import com.likelion.finalstudy.repository.RefreshTokenRepository;
-import com.likelion.finalstudy.repository.UserRepository;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.resttestclient.TestRestTemplate;
-import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -19,38 +13,21 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.context.annotation.Import;
 
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@AutoConfigureTestRestTemplate
 @ActiveProfiles("test")
-@Import(TestRestTemplateTestConfig.class)
 class UserControllerTest {
 
-    @Autowired(required = false)
-    private TestRestTemplate restTemplate;
+    private final TestRestTemplate restTemplate = new TestRestTemplate();
 
     @LocalServerPort
     private int port;
 
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private RefreshTokenRepository refreshTokenRepository;
-
-    @AfterEach
-    void tearDown() {
-        refreshTokenRepository.deleteAll();
-        userRepository.deleteAll();
-    }
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
     @DisplayName("인증 없이 /api/users/me 접근 실패")
@@ -131,9 +108,6 @@ class UserControllerTest {
     }
 
     private TestRestTemplate getRestTemplate() {
-        if (restTemplate == null) {
-            restTemplate = new TestRestTemplate();
-        }
         return restTemplate;
     }
 }

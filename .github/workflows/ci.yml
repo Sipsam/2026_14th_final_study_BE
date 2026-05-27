@@ -30,4 +30,29 @@ jobs:
       - name: Run Clean Build (Includes Tests with test Profile/H2)
         env:
           SPRING_PROFILES_ACTIVE: test
-        run: ./gradlew clean build --stacktrace
+        run: ./gradlew clean build --stacktrace --info --console=plain --no-daemon
+
+      - name: Dump Test Failure Traces
+        if: failure()
+        run: |
+          echo "=== Failed test XML files ==="
+          find build/test-results/test -type f -name '*.xml' -print || true
+          echo "=== Exception lines (UnsatisfiedDependency / NoSuchBeanDefinition) ==="
+          grep -RInE "UnsatisfiedDependencyException|NoSuchBeanDefinitionException|Caused by:" build/test-results/test || true
+          echo "=== First 200 lines of each failed XML ==="
+          for f in build/test-results/test/*.xml; do
+            if grep -q 'failures="[1-9]' "$f"; then
+              echo "--- $f ---"
+              sed -n '1,200p' "$f"
+            fi
+          done
+
+      - name: Upload Test Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gradle-test-reports
+          path: |
+            build/reports/tests/test/**
+            build/test-results/test/**
+          if-no-files-found: warn
