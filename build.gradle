@@ -53,7 +53,9 @@ dependencies {
     testImplementation 'com.h2database:h2'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
-
+springBoot {
+    mainClass = 'com.likelion.finalstudy.FinalStudyApplication'
+}
 tasks.named('test') {
     useJUnitPlatform()
     systemProperty 'spring.profiles.active', 'test'
