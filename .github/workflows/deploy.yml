@@ -21,8 +21,10 @@ jobs:
           script: |
             set -e
 
-            cd ~/apps/${{ github.event.repository.name }}
-            git pull origin week8/#6-jangsungwon
+            cd "${{ secrets.APP_DIR }}"
+             git fetch origin
+            git checkout "${{ secrets.DEPLOY_BRANCH }}"
+            git pull --ff-only origin "${{ secrets.DEPLOY_BRANCH }}"
 
             docker compose down
             docker compose up -d --build
