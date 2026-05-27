@@ -22,8 +22,10 @@ jobs:
             set -e
 
             cd "${{ secrets.APP_DIR }}"
-             git fetch origin
+            git fetch origin
             git checkout "${{ secrets.DEPLOY_BRANCH }}"
+            git reset --hard
+            git clean -fd
             git pull --ff-only origin "${{ secrets.DEPLOY_BRANCH }}"
 
             docker compose down
@@ -31,12 +33,19 @@ jobs:
 
             docker ps
 
-            if curl -fsS http://localhost:8080/actuator/health; then
-              echo "Health check passed: /actuator/health"
-            elif curl -fsS http://localhost:8080/v3/api-docs >/dev/null; then
-              echo "Fallback health check passed: /v3/api-docs"
-            else
-              echo "Health check failed"
-              docker compose logs --tail=200 app
-              exit 1
+            echo "Waiting for Spring Boot application to be ready..."
+
+            for i in {1..30}; do
+              if curl -fsS http://localhost:8080/actuator/health > /dev/null; then
+                echo "Application is ready."
+                exit 0
+              fi
+
+              echo "Application is not ready yet. Retry $i/30"
+              sleep 3
+            done
+
+            echo "Application failed to become ready."
+            docker compose logs --tail=200 app
+            exit 1
             fi

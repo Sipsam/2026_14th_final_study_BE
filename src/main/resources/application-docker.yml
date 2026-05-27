@@ -17,10 +17,6 @@ spring:
         use_sql_comments: true
     show-sql: true
 
-  jackson:
-    serialization:
-      write-dates-as-timestamps: false
-
 jwt:
   # NOTE: Docker 환경 설정. 실제 서비스에서는 환경변수/시크릿 매니저로 분리하세요.
   secret-key: your-secret-key-your-secret-key-your-secret-key
@@ -48,3 +44,11 @@ logging:
     org.springframework.web: INFO
     org.springframework.security: INFO
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
