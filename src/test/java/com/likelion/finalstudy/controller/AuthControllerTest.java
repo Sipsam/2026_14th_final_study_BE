@@ -31,7 +31,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @Import(TestRestTemplateTestConfig.class)
 class AuthControllerTest {
 
-    @Autowired
+    @Autowired(required = false)
     private TestRestTemplate restTemplate;
 
     @LocalServerPort
@@ -250,7 +250,7 @@ class AuthControllerTest {
 
         String body = requestBody == null ? null : toJson(requestBody);
         HttpEntity<String> entity = new HttpEntity<>(body, headers);
-        return restTemplate.exchange(baseUrl(path), HttpMethod.POST, entity, String.class);
+        return getRestTemplate().exchange(baseUrl(path), HttpMethod.POST, entity, String.class);
     }
 
     private String toJson(Object value) {
@@ -263,6 +263,13 @@ class AuthControllerTest {
 
     private String baseUrl(String path) {
         return "http://localhost:" + port + path;
+    }
+
+    private TestRestTemplate getRestTemplate() {
+        if (restTemplate == null) {
+            restTemplate = new TestRestTemplate();
+        }
+        return restTemplate;
     }
 }
 

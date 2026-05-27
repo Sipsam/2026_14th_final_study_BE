@@ -31,7 +31,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @Import(TestRestTemplateTestConfig.class)
 class UserControllerTest {
 
-    @Autowired
+    @Autowired(required = false)
     private TestRestTemplate restTemplate;
 
     @LocalServerPort
@@ -55,7 +55,7 @@ class UserControllerTest {
     @Test
     @DisplayName("인증 없이 /api/users/me 접근 실패")
     void getMeUnauthorized() throws Exception {
-        ResponseEntity<String> response = restTemplate.getForEntity(baseUrl("/api/users/me"), String.class);
+        ResponseEntity<String> response = getRestTemplate().getForEntity(baseUrl("/api/users/me"), String.class);
         JsonNode body = objectMapper.readTree(response.getBody());
 
         assertEquals(401, response.getStatusCode().value());
@@ -72,7 +72,7 @@ class UserControllerTest {
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + accessToken);
-        ResponseEntity<String> response = restTemplate.exchange(
+        ResponseEntity<String> response = getRestTemplate().exchange(
                 baseUrl("/api/users/me"),
                 HttpMethod.GET,
                 new HttpEntity<>(headers),
@@ -115,7 +115,7 @@ class UserControllerTest {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> entity = new HttpEntity<>(toJson(requestBody), headers);
-        return restTemplate.exchange(baseUrl(path), HttpMethod.POST, entity, String.class);
+        return getRestTemplate().exchange(baseUrl(path), HttpMethod.POST, entity, String.class);
     }
 
     private String toJson(Object value) {
@@ -128,6 +128,13 @@ class UserControllerTest {
 
     private String baseUrl(String path) {
         return "http://localhost:" + port + path;
+    }
+
+    private TestRestTemplate getRestTemplate() {
+        if (restTemplate == null) {
+            restTemplate = new TestRestTemplate();
+        }
+        return restTemplate;
     }
 }
 
